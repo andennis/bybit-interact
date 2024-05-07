@@ -41,6 +41,7 @@ class TPSLProperties:
     mode: TPSLMode = TPSLMode.FULL
     order_type: TPOrderType = TPOrderType.MARKET
     take_profit: float = None
+    stop_loss: float = None
 
 
 @dataclass

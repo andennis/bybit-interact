@@ -37,11 +37,12 @@ class Derivatives(BybitHttpSession):
             qty=str(qty),
             price=str(price)
         )
-        if tp_sl:
+        if tp_sl and (tp_sl.take_profit or tp_sl.stop_loss):
             params.update(dict(
                 tpslMode=tp_sl.mode.value,
                 tpOrderType=tp_sl.order_type.value,
-                takeProfit=str(tp_sl.take_profit),
+                takeProfit=str(tp_sl.take_profit) if tp_sl.take_profit else "",
+                stopLoss=str(tp_sl.stop_loss) if tp_sl.stop_loss else ""
             ))
 
         data = self.session.place_order(**params)
