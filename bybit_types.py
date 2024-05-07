@@ -1,5 +1,5 @@
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 class Market(Enum):
@@ -46,7 +46,7 @@ class TPSLProperties:
 @dataclass
 class BybitResponse:
     retCode: int
-    retMsg: str
-    result: dict
-    retExtInfo: dict
-    time: int
+    retMsg: str = ""
+    result: dict = field(default_factory=dict)
+    retExtInfo: dict = field(default_factory=dict)
+    time: int = 0
