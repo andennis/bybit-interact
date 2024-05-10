@@ -36,5 +36,11 @@ def test_bybit_trade():
     assert bybit.trade.session == bybit._http_session
 
 
+def test_bybit_market():
+    bybit = Bybit()
+    assert bybit.market
+    assert bybit.market.session
+    assert bybit.market.session == bybit._http_session
+
 
 

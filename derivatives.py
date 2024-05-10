@@ -1,12 +1,12 @@
 from typing import Optional
 from pybit.unified_trading import HTTP
-from bybit_session import BybitHttpSession
 from bybit_types import Market, OrderSide, TradePair, OrderType, TPSLProperties, BybitResponse
+from trade_base import BaseTrade
 
 
-class Derivatives(BybitHttpSession):
+class Derivatives(BaseTrade):
     def __init__(self, session: HTTP):
-        super(Derivatives, self).__int__(session)
+        super(Derivatives, self).__init__(session)
 
     def buy_limit(self,
                   trade_pair: TradePair,

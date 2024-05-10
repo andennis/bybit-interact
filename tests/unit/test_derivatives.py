@@ -3,7 +3,8 @@ import pytest
 
 from bybit import Bybit
 from bybit_types import TradePair, BybitResponse, Market, OrderSide, OrderType
-from bybit_types import TPSLMode, TPOrderType, TPSLProperties
+from bybit_types import TPSLProperties
+from exceptions import BybitException
 
 
 @pytest.mark.parametrize("data", [
@@ -22,6 +23,37 @@ def test_bybit_response(data: dict):
 @pytest.fixture
 def bybit() -> Bybit:
     return Bybit()
+
+
+def test_get_current_price_ok(bybit: Bybit):
+    data = {
+        'retCode': 0,
+        'retMsg': 'OK',
+        "result": {
+            "a": [["5.5", "123"]],
+            "b": [["5.4", "221"]]
+        }
+    }
+    with patch.object(bybit.trade.derivatives.session, "get_orderbook", return_value=data) as mock_get_current_price:
+        result = bybit.trade.derivatives.get_current_price(TradePair.TON_USDT)
+        assert result
+        assert result.ask == float(data["result"]["a"][0][0])
+        assert result.bid == float(data["result"]["b"][0][0])
+        mock_get_current_price.assert_called_once_with(
+            category=Market.LINEAR.value,
+            symbol=TradePair.TON_USDT.value,
+            limit=1
+        )
+
+
+def test_get_current_price_error_code(bybit: Bybit):
+    data = {
+        'retCode': 1,
+        'retMsg': 'some error'
+    }
+    with patch.object(bybit.trade.derivatives.session, "get_orderbook", return_value=data):
+        with pytest.raises(BybitException):
+            bybit.trade.derivatives.get_current_price(TradePair.TON_USDT)
 
 
 def test_buy_limit(bybit: Bybit):

@@ -2,7 +2,7 @@ from pybit.unified_trading import HTTP
 
 
 class BybitHttpSession:
-    def __int__(self, http_session: HTTP):
+    def __init__(self, http_session: HTTP):
         self._session = http_session
 
     @property

@@ -19,6 +19,21 @@ class TradePair(Enum):
 class OrderType(Enum):
     MARKET = "Market"
     LIMIT = "Limit"
+    UNKNOWN = "UNKNOWN"
+
+
+class TriggerDirection(Enum):
+    # Triggered when market price rises to trigger price
+    RAISES = 1
+    # Triggered when market price falls to trigger price
+    FALLS = 2
+
+
+# Identify position in different position modes
+class PositionIdx(Enum):
+    ONE_WAY = 0
+    HEDGE_BUY = 1
+    HEDGE_SELL = 2
 
 
 class TPSLMode(Enum):
@@ -51,3 +66,13 @@ class BybitResponse:
     result: dict = field(default_factory=dict)
     retExtInfo: dict = field(default_factory=dict)
     time: int = 0
+
+
+@dataclass
+class MarketPrice:
+    ask: float
+    bid: float
+
+    def __int__(self, ask: float, bid: float):
+        self.ask = ask
+        self.bid = bid

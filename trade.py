@@ -7,7 +7,7 @@ from derivatives import Derivatives
 
 class Trade(BybitHttpSession):
     def __init__(self, session: HTTP):
-        super(Trade, self).__int__(session)
+        super(Trade, self).__init__(session)
 
     @cached_property
     def derivatives(self):
