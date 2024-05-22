@@ -5,6 +5,10 @@ from bybit import Bybit
 from bybit_types import BBEnvVars
 
 
+# @pytest.fixture()
+# def bybit():
+#     return Bybit()
+
 @pytest.mark.parametrize("testnet", [True, False])
 def test_session(testnet):
     bybit = Bybit(api_key="some_api_key", api_secret="some_secret", testnet=testnet)
@@ -27,6 +31,11 @@ def test_bybit_testnet_on_by_default():
     bybit = Bybit()
     assert bybit._http_session
     assert bybit._http_session.testnet
+
+
+def test_config():
+    bybit = Bybit()
+    assert bybit.config
 
 
 def test_bybit_trade():

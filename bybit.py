@@ -5,6 +5,7 @@ from trade import Trade
 from market import Market
 from functools import cached_property
 from bybit_types import BBEnvVars
+from bybit_config import BybitConfig
 
 
 class Bybit:
@@ -17,8 +18,12 @@ class Bybit:
         )
 
     @cached_property
+    def config(self) -> BybitConfig:
+        return BybitConfig()
+
+    @cached_property
     def trade(self):
-        return Trade(self._http_session)
+        return Trade(self._http_session, self.config)
 
     @cached_property
     def market(self):

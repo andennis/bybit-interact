@@ -7,19 +7,19 @@ from bybit import Bybit
 logging.basicConfig(format="%(asctime)s %(message)s", level=logging.DEBUG)
 
 # Test
-API_KEY = ""
-API_SECRET = ""
+API_KEY = "addoY1N4m0HXdDSxx2"
+API_SECRET = "GVk5DwZei44QTFGP8L85mgLXTKnrl30SDJiy"
 
 bybit = Bybit(api_key=API_KEY, api_secret=API_SECRET)
+session = HTTP(
+    testnet=True,
+    api_key=API_KEY,
+    api_secret=API_SECRET,
+)
 
 
 def place_order(category: Market, symbol: str, side: str, order_type: str, price: float, amount: int,
                 take_profit: float = None, trigger_price: float = None):
-    session = HTTP(
-        testnet=True,
-        api_key=API_KEY,
-        api_secret=API_SECRET,
-    )
     return session.place_order(
         category=category.value,
         symbol=symbol,
@@ -37,6 +37,13 @@ def place_order(category: Market, symbol: str, side: str, order_type: str, price
     )
 
 
+def get_ticker(category: Market):
+    return session.get_tickers(
+        category=category.value,
+        symbol=TradePair.TON_USDT.value,
+    )
+
+
 # def place_strategy_order(price: int, qty: int, profit: int, diff: int):
 #     bybit.trade.derivatives.buy_limit(
 #         trade_pair=TradePair.TON_USDT,
@@ -51,7 +58,7 @@ def place_order(category: Market, symbol: str, side: str, order_type: str, price
 
 
 if __name__ == '__main__':
-    res = place_order(Market.LINEAR, "TONUSDT", "Sell", "Limit", 6.5, 12, trigger_price=6.5)
+    # res = place_order(Market.LINEAR, "TONUSDT", "Sell", "Limit", 6.5, 12, trigger_price=6.5)
     # res = bybit.trade.derivatives.sell_limit(trade_pair=TradePair.TON_USDT, qty=3, price=5.7875)
     # res = bybit.trade.derivatives.buy_limit(trade_pair=TradePair.TON_USDT, qty=3, price=5.7815)
     # res = bybit.trade.derivatives.sell_limit(
@@ -59,4 +66,15 @@ if __name__ == '__main__':
     #     qty=3,
     #     price=5.8,
     #     tp_sl=TPSLProperties(take_profit=5.6, stop_loss=5.9))
+
+    # res = get_ticker(Market.LINEAR)
+    # print(res)
+    # print(res["result"]["list"][0]["lastPrice"])
+
+    # print(bybit.trade.derivatives.get_last_price(TradePair.TON_USDT))
+    res = bybit.trade.derivatives.buy_limit_conditional(
+        trade_pair=TradePair.TON_USDT,
+        qty=3,
+        trigger_price=6.354,
+        price=6.34)
     print(res)

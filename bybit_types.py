@@ -67,12 +67,11 @@ class BybitResponse:
     retExtInfo: dict = field(default_factory=dict)
     time: int = 0
 
-
-@dataclass
-class MarketPrice:
-    ask: float
-    bid: float
-
-    def __int__(self, ask: float, bid: float):
-        self.ask = ask
-        self.bid = bid
+# @dataclass
+# class MarketPrice:
+#     ask: float
+#     bid: float
+#
+#     def __int__(self, ask: float, bid: float):
+#         self.ask = ask
+#         self.bid = bid
