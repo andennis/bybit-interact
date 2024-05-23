@@ -7,8 +7,8 @@ from bybit import Bybit
 logging.basicConfig(format="%(asctime)s %(message)s", level=logging.DEBUG)
 
 # Test
-API_KEY = ""
-API_SECRET = ""
+API_KEY = "addoY1N4m0HXdDSxx2"
+API_SECRET = "GVk5DwZei44QTFGP8L85mgLXTKnrl30SDJiy"
 
 bybit = Bybit(api_key=API_KEY, api_secret=API_SECRET)
 bybit.config._trade_pairs[TradePair.TON_USDT] = True
