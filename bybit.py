@@ -9,7 +9,12 @@ from bybit_config import BybitConfig
 
 
 class Bybit:
-    def __init__(self, api_key: Optional[str] = None, api_secret: Optional[str] = None, testnet: bool = True):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        api_secret: Optional[str] = None,
+        testnet: bool = True,
+    ):
         self._http_session = HTTP(
             api_key=api_key or os.environ.get(BBEnvVars.API_KEY.value),
             api_secret=api_secret or os.environ.get(BBEnvVars.API_SECRET.value),

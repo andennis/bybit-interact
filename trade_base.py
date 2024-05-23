@@ -19,10 +19,14 @@ class BaseTrade(BybitHttpSession):
         raise NotImplemented("The property 'market' must be implemented")
 
     def get_last_price(self, trade_pair: TradePair) -> float:
-        response = self.session.get_tickers(category=self.market.value, symbol=trade_pair.value)
+        response = self.session.get_tickers(
+            category=self.market.value, symbol=trade_pair.value
+        )
         if response["retCode"] != 0:
-            raise BybitException(f"Derivatives.get_last_price failed: {response['retMsg']}, "
-                                 f"code: {response['retCode']}")
+            raise BybitException(
+                f"Derivatives.get_last_price failed: {response['retMsg']}, "
+                f"code: {response['retCode']}"
+            )
         return float(response["result"]["list"][0]["lastPrice"])
 
     # def get_current_price(self, trade_pair: TradePair) -> MarketPrice:

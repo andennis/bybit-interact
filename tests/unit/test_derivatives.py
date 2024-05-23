@@ -2,22 +2,39 @@ from unittest.mock import patch
 import pytest
 
 from bybit import Bybit
-from bybit_types import TradePair, BybitResponse, Market, OrderSide, OrderType, PositionIdx
+from bybit_types import (
+    TradePair,
+    BybitResponse,
+    Market,
+    OrderSide,
+    OrderType,
+    PositionIdx,
+    TriggerDirection,
+)
 from bybit_types import TPSLProperties
 from exceptions import BybitException
 
 
-@pytest.mark.parametrize("data", [
-    {'retCode': 0, 'retMsg': 'OK', 'result': {'orderId': 10}, 'retExtInfo': {"p1": 3}, 'time': 100},
-    {'retCode': 1}
-])
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "retCode": 0,
+            "retMsg": "OK",
+            "result": {"orderId": 10},
+            "retExtInfo": {"p1": 3},
+            "time": 100,
+        },
+        {"retCode": 1},
+    ],
+)
 def test_bybit_response(data: dict):
     result = BybitResponse(**data)
-    assert result.retCode == data['retCode']
-    assert result.retMsg == data.get('retMsg', "")
-    assert result.result == data.get('result', {})
-    assert result.retExtInfo == data.get('retExtInfo', {})
-    assert result.time == data.get('time', 0)
+    assert result.retCode == data["retCode"]
+    assert result.retMsg == data.get("retMsg", "")
+    assert result.result == data.get("result", {})
+    assert result.retExtInfo == data.get("retExtInfo", {})
+    assert result.time == data.get("time", 0)
 
 
 @pytest.fixture
@@ -31,13 +48,15 @@ def test_market_linear(bybit: Bybit):
 
 def test_get_last_price_ok(bybit: Bybit):
     data = {
-        'retCode': 0,
-        'retMsg': 'OK',
+        "retCode": 0,
+        "retMsg": "OK",
         "result": {
             "list": [{"lastPrice": 11.23}],
-        }
+        },
     }
-    with patch.object(bybit.trade.derivatives.session, "get_tickers", return_value=data) as mock_get_tickers:
+    with patch.object(
+        bybit.trade.derivatives.session, "get_tickers", return_value=data
+    ) as mock_get_tickers:
         result = bybit.trade.derivatives.get_last_price(TradePair.TON_USDT)
         assert result == data["result"]["list"][0]["lastPrice"]
         mock_get_tickers.assert_called_once_with(
@@ -47,49 +66,59 @@ def test_get_last_price_ok(bybit: Bybit):
 
 
 def test_get_last_price_error_code(bybit: Bybit):
-    data = {
-        'retCode': 1,
-        'retMsg': 'some error'
-    }
-    with patch.object(bybit.trade.derivatives.session, "get_tickers", return_value=data):
+    data = {"retCode": 1, "retMsg": "some error"}
+    with patch.object(
+        bybit.trade.derivatives.session, "get_tickers", return_value=data
+    ):
         with pytest.raises(BybitException):
             bybit.trade.derivatives.get_last_price(TradePair.TON_USDT)
 
 
 @pytest.mark.parametrize("hedge_mode", [True, False])
 def test_buy_limit(bybit: Bybit, hedge_mode: bool):
-    data = {'retCode': 0, 'retMsg': 'OK'}
+    data = {"retCode": 0, "retMsg": "OK"}
     with patch.object(bybit.config, "is_hedge_mode", return_value=hedge_mode):
-        with patch.object(bybit.trade.derivatives.session, "place_order", return_value=data) as mock_place_order:
-            result = bybit.trade.derivatives.buy_limit(TradePair.TON_USDT, 1.001, 5.8625)
+        with patch.object(
+            bybit.trade.derivatives.session, "place_order", return_value=data
+        ) as mock_place_order:
+            result = bybit.trade.derivatives.buy_limit(
+                TradePair.TON_USDT, 1.001, 5.8625
+            )
             assert result
             assert result.retCode == 0
-            assert result.retMsg == 'OK'
+            assert result.retMsg == "OK"
             params = dict(
                 category=Market.LINEAR.value,
                 symbol=TradePair.TON_USDT.value,
                 side=OrderSide.BUY.value,
                 orderType=OrderType.LIMIT.value,
                 qty="1.001",
-                price="5.8625"
+                price="5.8625",
             )
             if hedge_mode:
                 params["positionIdx"] = PositionIdx.HEDGE_BUY.value
             mock_place_order.assert_called_once_with(**params)
 
 
-@pytest.mark.parametrize("tp_sl", [
-    TPSLProperties(take_profit=6.5001, stop_loss=5.8501),
-    TPSLProperties(take_profit=6.5002),
-    TPSLProperties(stop_loss=5.8502)
-])
+@pytest.mark.parametrize(
+    "tp_sl",
+    [
+        TPSLProperties(take_profit=6.5001, stop_loss=5.8501),
+        TPSLProperties(take_profit=6.5002),
+        TPSLProperties(stop_loss=5.8502),
+    ],
+)
 def test_buy_limit_with_tpsl(bybit: Bybit, tp_sl: TPSLProperties):
-    data = {'retCode': 0, 'retMsg': 'OK'}
-    with patch.object(bybit.trade.derivatives.session, "place_order", return_value=data) as mock_place_order:
-        result = bybit.trade.derivatives.buy_limit(TradePair.TON_USDT, 1.001, 5.8625, tp_sl=tp_sl)
+    data = {"retCode": 0, "retMsg": "OK"}
+    with patch.object(
+        bybit.trade.derivatives.session, "place_order", return_value=data
+    ) as mock_place_order:
+        result = bybit.trade.derivatives.buy_limit(
+            TradePair.TON_USDT, 1.001, 5.8625, tp_sl=tp_sl
+        )
         assert result
         assert result.retCode == 0
-        assert result.retMsg == 'OK'
+        assert result.retMsg == "OK"
         mock_place_order.assert_called_once_with(
             category=Market.LINEAR.value,
             symbol=TradePair.TON_USDT.value,
@@ -101,44 +130,55 @@ def test_buy_limit_with_tpsl(bybit: Bybit, tp_sl: TPSLProperties):
             tpslMode=tp_sl.mode.value,
             tpOrderType=tp_sl.order_type.value,
             takeProfit=str(tp_sl.take_profit) if tp_sl.take_profit else "",
-            stopLoss=str(tp_sl.stop_loss) if tp_sl.stop_loss else ""
+            stopLoss=str(tp_sl.stop_loss) if tp_sl.stop_loss else "",
         )
 
 
 @pytest.mark.parametrize("hedge_mode", [True, False])
 def test_sell_limit(bybit: Bybit, hedge_mode: bool):
-    data = {'retCode': 0, 'retMsg': 'OK'}
+    data = {"retCode": 0, "retMsg": "OK"}
     with patch.object(bybit.config, "is_hedge_mode", return_value=hedge_mode):
-        with patch.object(bybit.trade.derivatives.session, "place_order", return_value=data) as mock_place_order:
-            result = bybit.trade.derivatives.sell_limit(TradePair.TON_USDT, 2.0012, 5.8101)
+        with patch.object(
+            bybit.trade.derivatives.session, "place_order", return_value=data
+        ) as mock_place_order:
+            result = bybit.trade.derivatives.sell_limit(
+                TradePair.TON_USDT, 2.0012, 5.8101
+            )
             assert result
             assert result.retCode == 0
-            assert result.retMsg == 'OK'
+            assert result.retMsg == "OK"
             params = dict(
                 category=Market.LINEAR.value,
                 symbol=TradePair.TON_USDT.value,
                 side=OrderSide.SELL.value,
                 orderType=OrderType.LIMIT.value,
                 qty="2.0012",
-                price="5.8101"
+                price="5.8101",
             )
             if hedge_mode:
                 params["positionIdx"] = PositionIdx.HEDGE_SELL.value
             mock_place_order.assert_called_once_with(**params)
 
 
-@pytest.mark.parametrize("tp_sl", [
-    TPSLProperties(take_profit=5.7001, stop_loss=5.8301),
-    TPSLProperties(take_profit=5.7001),
-    TPSLProperties(stop_loss=5.8301)
-])
+@pytest.mark.parametrize(
+    "tp_sl",
+    [
+        TPSLProperties(take_profit=5.7001, stop_loss=5.8301),
+        TPSLProperties(take_profit=5.7001),
+        TPSLProperties(stop_loss=5.8301),
+    ],
+)
 def test_sell_limit_with_tpsl(bybit: Bybit, tp_sl: TPSLProperties):
-    data = {'retCode': 0, 'retMsg': 'OK'}
-    with patch.object(bybit.trade.derivatives.session, "place_order", return_value=data) as mock_place_order:
-        result = bybit.trade.derivatives.sell_limit(TradePair.TON_USDT, 2.0012, 5.8101, tp_sl=tp_sl)
+    data = {"retCode": 0, "retMsg": "OK"}
+    with patch.object(
+        bybit.trade.derivatives.session, "place_order", return_value=data
+    ) as mock_place_order:
+        result = bybit.trade.derivatives.sell_limit(
+            TradePair.TON_USDT, 2.0012, 5.8101, tp_sl=tp_sl
+        )
         assert result
         assert result.retCode == 0
-        assert result.retMsg == 'OK'
+        assert result.retMsg == "OK"
         mock_place_order.assert_called_once_with(
             category=Market.LINEAR.value,
             symbol=TradePair.TON_USDT.value,
@@ -150,5 +190,5 @@ def test_sell_limit_with_tpsl(bybit: Bybit, tp_sl: TPSLProperties):
             tpslMode=tp_sl.mode.value,
             tpOrderType=tp_sl.order_type.value,
             takeProfit=str(tp_sl.take_profit) if tp_sl.take_profit else "",
-            stopLoss=str(tp_sl.stop_loss) if tp_sl.stop_loss else ""
+            stopLoss=str(tp_sl.stop_loss) if tp_sl.stop_loss else "",
         )

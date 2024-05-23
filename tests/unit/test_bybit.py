@@ -9,17 +9,28 @@ from bybit_types import BBEnvVars
 # def bybit():
 #     return Bybit()
 
+
 @pytest.mark.parametrize("testnet", [True, False])
 def test_session(testnet):
-    bybit = Bybit(api_key="some_api_key", api_secret="some_secret", testnet=testnet)
+    bybit = Bybit(
+        api_key="some_api_key", api_secret="some_secret", testnet=testnet
+    )
     assert bybit._http_session
     assert bybit._http_session.api_key == "some_api_key"
     assert bybit._http_session.api_secret == "some_secret"
     assert bybit._http_session.testnet == testnet
 
 
-@pytest.mark.parametrize("apy_key, api_secret", [(None, None), ("key1", "secret1")])
-@patch.dict(os.environ, {BBEnvVars.API_KEY.value: "env_api_key", BBEnvVars.API_SECRET.value: "env_secret"})
+@pytest.mark.parametrize(
+    "apy_key, api_secret", [(None, None), ("key1", "secret1")]
+)
+@patch.dict(
+    os.environ,
+    {
+        BBEnvVars.API_KEY.value: "env_api_key",
+        BBEnvVars.API_SECRET.value: "env_secret",
+    },
+)
 def test_session_key_from_env(apy_key: str, api_secret: str):
     bybit = Bybit(api_key=apy_key, api_secret=api_secret, testnet=False)
     assert bybit._http_session
@@ -50,6 +61,3 @@ def test_bybit_market():
     assert bybit.market
     assert bybit.market.session
     assert bybit.market.session == bybit._http_session
-
-
-

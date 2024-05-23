@@ -67,6 +67,7 @@ class BybitResponse:
     retExtInfo: dict = field(default_factory=dict)
     time: int = 0
 
+
 # @dataclass
 # class MarketPrice:
 #     ask: float
