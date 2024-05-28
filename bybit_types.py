@@ -53,7 +53,7 @@ class BBEnvVars(Enum):
 
 @dataclass
 class TPSLProperties:
-    mode: TPSLMode = TPSLMode.FULL
+    mode: TPSLMode = TPSLMode.PARTIAL
     order_type: TPOrderType = TPOrderType.MARKET
     take_profit: float = None
     stop_loss: float = None
