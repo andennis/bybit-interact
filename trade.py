@@ -2,7 +2,8 @@ from functools import cached_property
 
 from pybit.unified_trading import HTTP
 from bybit_session import BybitHttpSession
-from derivatives import Derivatives
+from trade_derivatives import TradeDerivatives
+from trade_spot import TradeSpot
 from bybit_config import BybitConfig
 
 
@@ -13,4 +14,8 @@ class Trade(BybitHttpSession):
 
     @cached_property
     def derivatives(self):
-        return Derivatives(self.session, self._config)
+        return TradeDerivatives(self.session, self._config)
+
+    @cached_property
+    def spot(self):
+        return TradeSpot(self.session, self._config)

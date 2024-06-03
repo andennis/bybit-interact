@@ -1,3 +1,4 @@
+from typing import Optional
 from bybit_session import BybitHttpSession
 from pybit.unified_trading import HTTP
 from exceptions import BybitException
@@ -14,9 +15,9 @@ from bybit_types import TPSLProperties
 from bybit_config import BybitConfig
 
 
-class BaseTrade(BybitHttpSession):
+class TradeBase(BybitHttpSession):
     def __init__(self, session: HTTP, config: BybitConfig):
-        super(BaseTrade, self).__init__(session)
+        super(TradeBase, self).__init__(session)
         self._config = config
 
     @property
@@ -37,6 +38,78 @@ class BaseTrade(BybitHttpSession):
                 f"code: {response['retCode']}"
             )
         return float(response["result"]["list"][0]["lastPrice"])
+
+    def buy_limit(
+        self,
+        trade_pair: TradePair,
+        qty: float,
+        price: float,
+        tp_sl: Optional[TPSLProperties] = None,
+    ) -> BybitResponse:
+        return self._place_order(
+            trade_pair, OrderSide.BUY, OrderType.LIMIT, qty, price, tp_sl=tp_sl
+        )
+
+    def sell_limit(
+        self,
+        trade_pair: TradePair,
+        qty: float,
+        price: float,
+        tp_sl: Optional[TPSLProperties] = None,
+    ) -> BybitResponse:
+        return self._place_order(
+            trade_pair, OrderSide.SELL, OrderType.LIMIT, qty, price, tp_sl=tp_sl
+        )
+
+    def buy_limit_conditional(
+        self,
+        trade_pair: TradePair,
+        trigger_price: float,
+        qty: float,
+        price: float,
+        tp_sl: Optional[TPSLProperties] = None,
+    ) -> BybitResponse:
+        if not trigger_price:
+            raise BybitException("trigger_price is required")
+        if trigger_price < price:
+            raise BybitException(
+                "trigger_price must be greater or equal to the BUY limit price"
+            )
+
+        return self._place_order(
+            trade_pair,
+            OrderSide.BUY,
+            OrderType.LIMIT,
+            qty,
+            price,
+            trigger_price=trigger_price,
+            tp_sl=tp_sl,
+        )
+
+    def sell_limit_conditional(
+        self,
+        trade_pair: TradePair,
+        trigger_price: float,
+        qty: float,
+        price: float,
+        tp_sl: Optional[TPSLProperties] = None,
+    ) -> BybitResponse:
+        if not trigger_price:
+            raise BybitException("trigger_price is required")
+        if trigger_price > price:
+            raise BybitException(
+                "trigger_price must be less or equal to the SELL limit price"
+            )
+
+        return self._place_order(
+            trade_pair,
+            OrderSide.SELL,
+            OrderType.LIMIT,
+            qty,
+            price,
+            trigger_price=trigger_price,
+            tp_sl=tp_sl,
+        )
 
     def _place_order(
         self,
